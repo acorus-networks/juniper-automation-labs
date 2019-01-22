@@ -4,5 +4,5 @@ interfaces:
       ip: 192.168.2.2
     - name: xe-0/0/2
       ip: 192.168.4.1
-    - name: xe-0/0/5
+    - name: xe-0/0/4
       ip: 192.168.100.21
