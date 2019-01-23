@@ -1,0 +1,32 @@
+---
+- name: Config Users of Juniper devices
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+ 
+  roles:
+    - roles/Juniper.junos
+    - roles/base
+
+  vars:
+    ansible_network_os: junos
+    ansible_user: noc
+
+  tasks:
+
+    - name: Assembling configurations and copying to conf
+      assemble: src=~/ansible/configs/{{ ansible_host }} dest=~/ansible/configs/{{ ansible_host }}/{{ inventory_hostname }}.conf
+
+    - name: Pushing config ... please wait ...
+      juniper_junos_config:
+        config_mode: 'private'
+        src: ~/ansible/configs/{{ ansible_host }}/{{ inventory_hostname }}.conf
+        load: replace
+        ignore_warning: true
+      register: response
+
+    - name: Print the difference if exists
+      tags: always
+      debug:
+        var: response.diff_lines
+      when: response is defined and response.diff_lines is defined

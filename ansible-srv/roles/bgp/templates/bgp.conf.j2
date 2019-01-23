@@ -1,0 +1,54 @@
+protocols {
+  
+  bgp {
+
+    {% for peer in peers %}
+    replace:
+    group ipv4-{{ peer.name }} {
+      description "IPV4 AS{{ peer.asn }}"
+      type external;
+
+      family inet {
+        unicast;
+      }
+
+      local-as 65500;
+      local-address {{ peer.local_ipv4 }};
+
+      neighbor {{ peer.neighbor_ipv4  }};
+      peer-as {{ peer.asn  }};
+
+      import ipv4-as{{ peer.asn }};
+
+    }
+    {% endfor %}
+  }
+}
+
+
+policy-options {
+  
+  {% for peer in peers %}
+  replace:
+  policy-statement ipv4-as{{ peer.asn }} {
+
+    {% if (transit_filtered_prefixes is defined) and (transit_filtered_prefixes[peer.asn] is defined) and (transit_filtered_prefixes[peer.asn]['ipv4'] is defined) and ((transit_filtered_prefixes[peer.asn]['ipv4']|length ) > 0) %}
+
+    term accepted {
+      from {
+        {% for prefix in transit_filtered_prefixes[peer.asn]['ipv4'] %}
+          route-filter {{ prefix }} exact;
+        {% endfor %}
+      }
+      then accept;
+    }
+    term other {
+      then reject;
+    }
+    {% else %}
+    then accept;
+    {% endif %}
+
+  }
+  {% endfor %}
+}

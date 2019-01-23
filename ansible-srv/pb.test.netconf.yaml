@@ -1,0 +1,27 @@
+---
+- name: Compare  Junos OS
+  hosts: all
+  connection: network_cli
+  roles:
+    - roles/Juniper.junos
+  gather_facts: no
+
+  vars:
+    ansible_network_os: junos
+    ansible_user: noc
+
+  tasks:
+
+    - name: Checking NETCONF connectivity
+      wait_for: host={{ ansible_host }} port=830 timeout=15
+
+    - name: Print IP of remote device
+      debug:
+        msg: "{{ ansible_host }}"
+
+    - name: Retrieving information from devices running Junos OS
+      juniper_junos_facts:
+
+    - name: Print version
+      debug: 
+        var: junos.version

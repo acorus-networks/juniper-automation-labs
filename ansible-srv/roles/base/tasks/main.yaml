@@ -1,0 +1,17 @@
+---
+# tasks file for roles/base
+
+- name: Create host specific configuration directory
+  file: path=~/configs/{{ ansible_host }} state=directory
+
+- file: path=~/ansible/configs/{{ ansible_host }}/users.conf.part state=absent
+- file: path=~/ansible/configs/{{ ansible_host }}/{{ ansible_host }}.conf state=absent
+
+- name: Base Configuration
+  template:
+    src={{ item }}.j2
+    dest=~/ansible/configs/{{ ansible_host }}/{{ item }}.part
+  tags:
+    - base
+  with_items:
+    - users.conf

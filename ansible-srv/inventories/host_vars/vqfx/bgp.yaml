@@ -1,0 +1,7 @@
+---
+peers:
+ - asn: 123
+   local_ipv4: "10.1.2.1"
+   neighbor_ipv4: "10.1.2.2"
+   name: transit-123
+   filter: ipv4-as123-transit-in

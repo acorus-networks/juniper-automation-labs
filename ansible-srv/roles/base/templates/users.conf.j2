@@ -1,0 +1,35 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+
+{% if common_users is defined %}
+system {
+  login {
+
+{% for user in common_users %}
+
+    {%+ if load_method is defined and load_method == "replace" %}replace:{{ "\n" }}{% endif %}
+    user {{ user.name }} {
+      {#uid {{ user.uid }};#}
+      full-name "{{ user.fullname }}";
+      class {{ user.class }};
+      authentication {
+
+        {% if user.password is defined %}
+        encrypted-password "{{ user.password }}";
+        {% endif %}
+
+        {% if user.ssh_pub is defined %}
+        {% for ssh_pub in user.ssh_pub %}
+        {{ ssh_pub.type}} "{{ ssh_pub.key }}";
+        {% endfor %}
+        {% endif %}
+
+      }
+    }
+
+{# for user in common_users #}
+{% endfor %}
+
+  }
+}
+{# if common_users is defined #}
+{% endif %}
