@@ -1,6 +1,6 @@
 ### This lab is based on Juniper Networks VQFX repo :
 https://github.com/Juniper/vqfx10k-vagrant
---------------------------------------------------------
+
 
 
 This Vagrantfile will spawn 3 instances of VQFX (Full) and 1 ubuntu server
