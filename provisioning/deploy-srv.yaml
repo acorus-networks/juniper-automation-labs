@@ -15,8 +15,13 @@
 
    - name: Update repositories cache and install packages
      apt:
-       upgrade: yes
+       name: ansible
        update_cache: yes
+
+   - name: Upgrade all packages to the latest version
+     apt:
+       name: "*"
+       state: latest
 
    - name: Install a list of packages
      apt:
@@ -24,7 +29,6 @@
      vars:
        packages:
        - python
-       - ansible
        - python-pip
 
    - name: install pip modules
