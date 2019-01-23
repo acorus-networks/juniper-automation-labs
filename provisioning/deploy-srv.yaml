@@ -6,10 +6,6 @@
   gather_facts: no
 
   tasks:
-    - name: Build configuration
-      template: src=vqfx.conf.j2 dest=/tmp/{{ inventory_hostname }}.conf
-    - name: Deploy config to device ... please wait
-
     - name: Add ansible ppa
       command: apt-add-repository --yes --update ppa:ansible/ansible
 
