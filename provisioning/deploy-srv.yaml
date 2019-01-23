@@ -13,35 +13,35 @@
     - name: Add ansible ppa
       command: apt-add-repository --yes --update ppa:ansible/ansible
 
-   - name: Update repositories cache and install packages
-     apt:
-       name: ansible
-       update_cache: yes
+    - name: Update repositories cache and install packages
+      apt:
+        name: ansible
+        update_cache: yes 
 
-   - name: Upgrade all packages to the latest version
-     apt:
-       name: "*"
-       state: latest
+    - name: Upgrade all packages to the latest version
+      apt:
+        name: "*"
+        state: latest 
 
-   - name: Install a list of packages
-     apt:
-       name: "{{ packages }}"
-     vars:
-       packages:
-       - python
-       - python-pip
+    - name: Install a list of packages
+      apt:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - python
+        - python-pip 
 
-   - name: install pip modules
-     command: pip install junos-eznc jxmlease   
+    - name: install pip modules
+      command: pip install junos-eznc jxmlease    
 
-   - name: install juniper ansible role
-     command: ansible-galaxy install Juniper.junos   
+    - name: install juniper ansible role
+      command: ansible-galaxy install Juniper.junos    
 
-   - name: sync files for lab
-     synchronize:
-       src: ../ansible-srv/
-       dest: /home/vagrant/   
+    - name: sync files for lab
+      synchronize:
+        src: ../ansible-srv/
+        dest: /home/vagrant/    
 
-   - file: dest=/home/vagrant owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
+    - file: dest=/home/vagrant owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
 
 
