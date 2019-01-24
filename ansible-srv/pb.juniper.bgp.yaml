@@ -5,8 +5,8 @@
   gather_facts: no
 
   roles:
-    - roles/Juniper.junos
-    - roles/bgp
+    - Juniper.junos
+    - bgp
 
   vars:
     ansible_network_os: junos
@@ -15,12 +15,12 @@
   tasks:
 
     - name: Assembling configurations and copying to conf
-      assemble: src=~/ansible/configs/{{ ansible_host }} dest=~/ansible/configs/{{ ansible_host }}/{{ inventory_hostname }}.conf
+      assemble: src=~/configs/{{ ansible_host }} dest=~/configs/{{ ansible_host }}/{{ inventory_hostname }}.conf
 
     - name: Pushing config ... please wait ...
       juniper_junos_config:
         config_mode: 'private'
-        src: ~/ansible/configs/{{ ansible_host }}/{{ inventory_hostname }}.conf
+        src: ~/configs/{{ ansible_host }}/{{ inventory_hostname }}.conf
         load: replace
         ignore_warning: true
       register: response

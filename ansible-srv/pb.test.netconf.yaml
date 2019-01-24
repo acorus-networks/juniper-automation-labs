@@ -3,7 +3,7 @@
   hosts: all
   connection: network_cli
   roles:
-    - roles/Juniper.junos
+    - Juniper.junos
   gather_facts: no
 
   vars:
