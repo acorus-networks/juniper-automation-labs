@@ -31,8 +31,11 @@
     - name: install pip modules
       command: pip install junos-eznc jxmlease    
 
+    - name: mkdir for juniper role
+      command: mkdir -p home/vagrant/.ansible/roles
+
     - name: install juniper ansible role
-      command: ansible-galaxy install Juniper.junos    
+      command: ansible-galaxy install -p /home/vagrant/.ansible/roles Juniper.junos    
 
     - name: sync files for lab
       synchronize:

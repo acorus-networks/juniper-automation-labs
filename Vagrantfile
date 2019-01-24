@@ -20,6 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config.vm.define pfe_name do |vqfxpfe|
             vqfxpfe.ssh.insert_key = false
             vqfxpfe.vm.box = 'juniper/vqfx10k-pfe'
+            vqfxpfe.vm.boot_timeout = 1200
 
             # DO NOT REMOVE / NO VMtools installed
             vqfxpfe.vm.synced_folder '.', '/vagrant', disabled: true
@@ -37,6 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         config.vm.define re_name do |vqfx|
             vqfx.vm.hostname = "vqfx#{id}"
             vqfx.vm.box = 'juniper/vqfx10k-re'
+            vqfx.vm.boot_timeout = 1200
 
             # DO NOT REMOVE / NO VMtools installed
             vqfx.vm.synced_folder '.', '/vagrant', disabled: true
@@ -60,6 +62,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         srv.vm.box = "bento/ubuntu-16.04"
         srv.vm.hostname = "server"
         srv.vm.network 'private_network', ip: "192.168.100.10", virtualbox__intnet: "#{UUID}_seg5"
+        srv.vm.boot_timeout = 1200
         srv.ssh.insert_key = true
     end
 
