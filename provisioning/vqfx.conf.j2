@@ -5,6 +5,14 @@ system {
         ssh-rsa "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key";
     }
     login {
+        user noc {
+            full-name "Noc account, used by ansible";
+            uid 2001;
+            class super-user;
+            authentication {
+                ssh-rsa "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWY1DJKRluAzYeIeeRwMxUj+PELCOw9hPnWggoPMeCOgBo/fDA1ZdSbOMUS3y4Nj45I9AEXMLP3ADdylsbVm9BOVUP+rDJU4rfZn/MabZ2gOgrQBJ7R/dJTQ5qZq9RA3MK1w3U9R7tW71R/tZpJ960TsWNLyacxzOoE2IZEE+qe9lnlP730VFJNbKoLwwkpd4Anl/nbqQBZY6sIkAbxlyzMKhDwryM5Pun1nGCBbOLjQMxzxIibDPIyPS5/+8II5Dk5ydnRLSiGlDccOE1VazdPFB2f+GgI3tLKZ/K8GkoSo4Nhqx4Pk8NJYmKgOtmSwLcYER886h+Y7h6bC5BOjTR noc@server"; ## SECRET-DATA
+            }
+        }
         user vagrant {
             uid 2000;
             class super-user;

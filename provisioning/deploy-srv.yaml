@@ -44,9 +44,12 @@
 
     - file: dest=/home/vagrant owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
 
-    - name: Create noc ssh keys
+    - name: Create noc ssh config
       copy:
         dest: "/home/vagrant/.ssh/config"
+        owner: vagrant
+        group: vagrant
+        mode: 0644
         content: |
           Host vqfx1
              User noc
@@ -66,6 +69,51 @@
              Port 22
              IdentityFile ~/.ssh/id_rsa
 
+    - name: Create noc priv keys (demo key)
+      copy:
+        dest: "/home/vagrant/.ssh/id_rsa"
+        owner: vagrant
+        group: vagrant
+        mode: 0600
+        content: |
+          -----BEGIN RSA PRIVATE KEY-----
+          MIIEowIBAAKCAQEA1mNQySkZbgM2HiHnkcDMVI/jxCwjsPYT51oIKDzHgjoAaP3w
+          wNWXUmzjFEt8uDY+OSPQBFzCz9wA3cpbG1ZvQTlVD/qwyVOK32Z/zGm2doDoK0AS
+          e0f3SU0OamavUQNzCtcN1PUe7Vu9Uf7WaSfetE7FjS8mnMczqBNiGRBPqnvZZ5T+
+          99FRSTWyqC8MJKXeAJ5f526kAWWOrCJAG8ZcszCoQ8K8jOT7p9ZxggWzi40DMc8S
+          ImwzyMj0uf/vCCOQ5OcnZ0S0ohpQ3HDhNVWs3TxQdn/hoCN7SymfyvBpKEqODYas
+          eD5PDSWJioDrZksC3GBEfPOofmO4emwuQTo00QIDAQABAoIBAQC7hWtoSNbBb3Wq
+          raVLzAPuA14KfUFKzDNkrU9tQpyPwAQT0esAANO3eR625cBVsLyEZlrRNgIApkLr
+          vNAr/VKbDnbk3zY7IyPZfGJUfjLnPKHXEtgXlT8rkocFcoPurMG3vZuPpkhC/Xd/
+          fRQ2LnWR6UTK1W9EusjoPuwTWD0WtFp0D4B9q2C3vt3tux6lipKphp535tAan59c
+          vrUkeg66csghzE19+PpIpZclaoaF8MeQK3/AVp1955kgMFCk+aH2Xt15Liz86enI
+          CqlhjTLv75LVypWGnEqP1/mDbDboVxKpAxIO/vTux8k09yxHEn4xtLsYbpD9Gvus
+          C8+D3X8BAoGBAP+kfqGqSyW1qbEDNxSvx6VBZ+/W2lcEcez/40Z86zGXt9cN2Iaq
+          78AD0xZS6fxCeBkwL65Mt1szdOuTelCoGZBKuklrfe3abNqwbzhdNQE8B7PVZq3r
+          2CEARIYYCCtXfLBI5bUk2F5cOY/cviOfG2rJQxmHM+X+B5BBiGc06VyZAoGBANaw
+          Ddvpxo6Y0YXwGOeuIfDYrhrBgqJC7HoxcaUhYypxsRNI3bEBNTNYReFcOUMiwAC0
+          2ZtokYoyToUx10S2jx/8+VBqg1m11kRzDBFKWjTHlSs5/BZ0451nlwybkeW6l1V4
+          XMAC9HRasStMwtQTbqn5DlsB2l6urgoSvGQIasT5AoGAEYinwtDaTKDUHbb5vSp9
+          SAFfbpzO5u8AHWBDp18EBqfATTi+5CWvQf1BKiPPtqScdiXO72aFoPS7jTjVR9jv
+          v+zQMB72SS0VED7Psg76hrYmVRhK7Zziewj4qjXVwZtDixfE4ZLAYGB09kAOroTI
+          LZ/WQVb7oUe2HxfPkjyX0OkCgYAPVmCHF3px8YT2dqKw2oXeOPynOK/me7V9PU8L
+          Jwl4nMqzv/7miFmOo33KjdYhb7gb1M+/BIdxQgrOBTOF2yz6cg41qoZbwFvgY/+2
+          tIMhRijn/6p8yDkCo8XsxqhzqxLorkKiDRP9xAToPQGmOQUs63gVFFrPbNdOLOx8
+          kQVfsQKBgHr1vU0FSA9ODwOa7jzNDsJQcOdKDa35ly+z/HLQknhqYYCsA89DFB0J
+          RK7wS/2ihmqVO/ZYZSOYiCBOBfofGjGdu40s1b6Ha+oM9afCxnTjljd2Xw9PtfVz
+          39I5KdPVEVIwOM5iTz7kuFBdg/HTuWPULoDeMj/IRkGyonYmcOEn
+          -----END RSA PRIVATE KEY-----
+
+
+    - name: Create noc priv keys (demo key)
+      copy:
+        dest: "/home/vagrant/.ssh/id_rsa.pub"
+        owner: vagrant
+        group: vagrant
+        mode: 0644
+        content: |
+          ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWY1DJKRluAzYeIeeRwMxUj+PELCOw9hPnWggoPMeCOgBo/fDA1ZdSbOMUS3y4Nj45I9AEXMLP3ADdylsbVm9BOVUP+rDJU4rfZn/MabZ2gOgrQBJ7R/dJTQ5qZq9RA3MK1w3U9R7tW71R/tZpJ960TsWNLyacxzOoE2IZEE+qe9lnlP730VFJNbKoLwwkpd4Anl/nbqQBZY6sIkAbxlyzMKhDwryM5Pun1nGCBbOLjQMxzxIibDPIyPS5/+8II5Dk5ydnRLSiGlDccOE1VazdPFB2f+GgI3tLKZ/K8GkoSo4Nhqx4Pk8NJYmKgOtmSwLcYER886h+Y7h6bC5BOjTR vagrant@server
+
     - name: insert entries in host file
       blockinfile:
         path: /etc/hosts
@@ -73,6 +121,8 @@
           192.168.100.20  vqfx1
           192.168.100.21  vqfx2
           192.168.100.22  vqfx3
+
+
 
 
 
