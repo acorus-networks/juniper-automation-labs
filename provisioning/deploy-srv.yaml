@@ -44,12 +44,11 @@
 
     - file: dest=/home/vagrant owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
 
-
-    - name: Edit ansible config file (paramiko)
-      blockinfile:
+    - name: Edit ansible config file (paramiko error)
+      lineinfile:
         path: /etc/ansible/ansible.cfg
-        block: |
-          host_key_checking = False
+        regexp: '^#host_key_checking = False'
+        line: 'host_key_checking = False'
 
     - name: Create vault id
       copy:
