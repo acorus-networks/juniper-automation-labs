@@ -44,6 +44,13 @@
 
     - file: dest=/home/vagrant owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
 
+
+    - name: Edit ansible config file (paramiko)
+      blockinfile:
+        path: /etc/ansible/ansible.cfg
+        block: |
+          host_key_checking = False
+
     - name: Create vault id
       copy:
         dest: "/home/vagrant/.vault_pass.txt"
