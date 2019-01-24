@@ -44,6 +44,16 @@
 
     - file: dest=/home/vagrant owner=vagrant group=vagrant mode=u=rwX,g=rX,o=rX recurse=yes
 
+    - name: Create vault id
+      copy:
+        dest: "/home/vagrant/.vault_pass.txt"
+        owner: vagrant
+        group: vagrant
+        mode: 0600
+        content: |
+          gN4PFTz5nmWWqpiYzmrcdSwHif6ePkYy7zwyhfkeFAQW9HwAVM3edKjDAmM5nKa
+
+
     - name: Create noc ssh config
       copy:
         dest: "/home/vagrant/.ssh/config"
