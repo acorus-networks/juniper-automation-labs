@@ -1,0 +1,17 @@
+---
+# tasks file for roles/base
+
+- name: Create host specific configuration directory
+  file: path=~/configs/{{ ansible_host }} state=directory
+
+- file: path=~/configs/{{ ansible_host }}/igp.conf.part state=absent
+- file: path=~/configs/{{ ansible_host }}/{{ ansible_host }}.conf state=absent
+
+- name: IGP Configuration
+  template:
+    src={{ item }}.j2
+    dest=~/configs/{{ ansible_host }}/{{ item }}.part
+  tags:
+    - igp
+  with_items:
+    - igp.conf

@@ -1,0 +1,73 @@
+#jinja2: lstrip_blocks: "True", trim_blocks: "True"
+
+{% if igp is defined %}
+{% if igp.loopbacks is defined %}
+{% for loopback in igp.loopbacks %}
+interfaces {
+  {{ loopback.name }} {
+
+    {%+ if load_method is defined and load_method == "replace" %}replace:{{ "\n" }}{% endif %}
+    unit {{ loopback.vlan }} {
+
+{% if loopback.ipv4 is defined %}
+      family inet {
+        address {{ loopback.ipv4.local_ip }}/{{ loopback.ipv4.netmask }};
+      }
+{# Endif IPv4 is defined #}
+{% endif %}
+    }
+  }
+}
+
+{# Endfor loopback in igp.loopbacks #}
+{% endfor %}
+
+{# Endif igp.loopbacks is defined #}
+{% endif %}
+
+
+{% if igp.neighbors is defined %}
+{% for neighbor in igp.neighbors %}
+
+interfaces {
+
+  {%+ if load_method is defined and load_method == "replace" %}replace:{{ "\n" }}{% endif %}
+  {{ neighbor.interface }} {
+
+    {% if neighbor.vlans is defined %}
+    {% for vlan in neighbor.vlans %}
+      
+    {% if vlan.id != 0 and loop.index == 1 %}
+    vlan-tagging;
+    {% endif %}
+
+    unit {{ vlan.id }} {
+
+      {%+ if vlan.id != 0 %}vlan-id {{ vlan.id }};{% endif %}
+
+      description "Core:" + interface.peer
+
+      {% if vlan.ipv4 is defined %}
+      family inet {
+        address {{ vlan.ipv4.local_ip }}/{{ vlan.ipv4.netmask }};
+      }
+      {# Endif IPv4 is defined #}
+      {% endif %}
+
+    }
+
+    {# Endfor vlan in neighbor.vlans #}
+    {% endfor %}
+    {# Endif neighbor.vlans is defined #}
+    {% endif %}
+  }
+}
+
+{# Endfor neighbor in igp.neighbors #}
+{% endfor %}
+
+{# Endif igp.neighbors is defined #}
+{% endif %}
+
+{# Endif igp is defined #}
+{% endif %}

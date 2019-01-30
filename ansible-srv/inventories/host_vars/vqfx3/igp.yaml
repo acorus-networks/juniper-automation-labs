@@ -1,0 +1,28 @@
+igp:
+  loopbacks:
+  - ipv4:
+      local_ip: 10.200.0.3
+      netmask: 32
+    name: lo0
+    vlan: 100
+  neighbors:
+  - interface: xe-0/0/1
+    peer: vqfx1
+    speed: 10G
+    type: local-core
+    vlans:
+    - id: 100
+      ipv4:
+        local_ip: 192.168.3.2
+        netmask: 24
+        peer_ip: 192.168.3.1
+  - interface: xe-0/0/2
+    peer: vqfx2
+    speed: 10G
+    type: local-core
+    vlans:
+    - id: 100
+      ipv4:
+        local_ip: 192.168.4.2
+        netmask: 24
+        peer_ip: 192.168.4.1
