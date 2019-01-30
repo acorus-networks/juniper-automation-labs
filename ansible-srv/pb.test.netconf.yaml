@@ -17,7 +17,7 @@
 
     - name: Print IP of remote device
       debug:
-        msg: "{{ ansible_host }}"
+        msg: "{{ mgmt_ip }}"
 
     - name: Retrieving information from devices running Junos OS
       juniper_junos_facts:

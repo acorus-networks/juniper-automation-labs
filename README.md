@@ -158,30 +158,30 @@ OUTPUT
 ```
 vagrant@server:~$ ansible-playbook -i inventories/hosts pb.test.netconf.yaml --vault-id ~/.vault_pass.txt
 
-PLAY [Compare  Junos OS] *************************************************************************************************************************************************
+PLAY [Compare  Junos OS] *****************************************************************************************************************************
 
-TASK [Checking NETCONF connectivity] *************************************************************************************************************************************
-ok: [vqfx1]
+TASK [Checking NETCONF connectivity] *****************************************************************************************************************
 ok: [vqfx2]
 ok: [vqfx3]
+ok: [vqfx1]
 
-TASK [Print IP of remote device] *****************************************************************************************************************************************
+TASK [Print IP of remote device] *********************************************************************************************************************
 ok: [vqfx1] => {
-    "msg": "vqfx1"
+    "msg": "192.168.100.20"
 }
 ok: [vqfx2] => {
-    "msg": "vqfx2"
+    "msg": "192.168.100.21"
 }
 ok: [vqfx3] => {
-    "msg": "vqfx3"
+    "msg": "192.168.100.22"
 }
 
-TASK [Retrieving information from devices running Junos OS] **************************************************************************************************************
-ok: [vqfx1]
+TASK [Retrieving information from devices running Junos OS] ******************************************************************************************
 ok: [vqfx2]
 ok: [vqfx3]
+ok: [vqfx1]
 
-TASK [Print version] *****************************************************************************************************************************************************
+TASK [Print version] *********************************************************************************************************************************
 ok: [vqfx1] => {
     "junos.version": "17.4R1.16"
 }
@@ -192,7 +192,7 @@ ok: [vqfx3] => {
     "junos.version": "17.4R1.16"
 }
 
-PLAY RECAP ***************************************************************************************************************************************************************
+PLAY RECAP *******************************************************************************************************************************************
 vqfx1                      : ok=4    changed=0    unreachable=0    failed=0
 vqfx2                      : ok=4    changed=0    unreachable=0    failed=0
 vqfx3                      : ok=4    changed=0    unreachable=0    failed=0
@@ -204,6 +204,15 @@ Everything is tested and ready, let's start the lab now !
 # Labs
 
 ### Step 1 : Add a new user on all network devices
+
+In this lab we'll show how to create and deploy new users on a group of network devices.
+
+It a good practice to update allowed users/password on a regular basis.
+
+Automation comes really handy when the number of managed devices increase.
+
+For this lab we'll also use Ansible vault feature to store these confidential informations.
+
 
 #### Create a new user locally on VQFX1 to generate user HASH
 
@@ -235,6 +244,18 @@ OUTPUT
 
 ```
 
+Copy the hash for the next step, now discard the pending changes :
+
+```
+{master:0}[edit]
+vagrant@vqfx1# rollback
+load complete
+
+{master:0}[edit]
+vagrant@vqfx1# exit
+Exiting configuration mode
+```
+
 
 #### Edit inventory to create the new user
 
@@ -252,7 +273,7 @@ Append to the file :
 ```
   - name: YOUR_USER
     fullname: "Insert description here"
-    class: "read-only"
+    class: "acorusread"
     password: "HASH_TO_COPY"
 ```
 
@@ -323,21 +344,85 @@ OUTPUT
 ```
 full-name "xxxx";
 uid 2006;
-class read-only;
+class acorusread;
 authentication {
     encrypted-password "$6$GAMRvF.5$.yhfl02NtcTn03p.9Z/Mts0Rhhif0qibapCXdlMa8DvzfGidRknsFQRVH6VTMUyc4DST9.hWZoB5EjE0D3cdC/"; ## SECRET-DATA
 }
 ```
 
-Try to ssh from server with the new user :
+Try to ssh from server with the new user (use IP address of one of the VQFX as we already have entries in .ssh/config file) :
 
 ```
-vagrant@server:~$ ssh {YOUR_USER}@10.1.2.1
+vagrant@server:~$ ssh {YOUR_USER}@192.168.100.20
 Password:
 ```
 
+Login should succeed and your new user now have a limited access on the device, show & ping. As you can see edit mode isn't available.
 
-### Step 2: Configure BGP sessions
+
+```
+{YOUR_USER}@vqfx1> edit
+```
+
+OUTPUT
+
+```
+            ^
+unknown command.
+
+{master:0}
+```
+
+Now try some show commands :
+
+```
+{YOUR_USER}@vqfx1> show configuration system
+```
+
+OUTPUT
+
+
+```
+host-name vqfx1;
+root-authentication {
+    encrypted-password /* SECRET-DATA */; ## SECRET-DATA
+    ssh-rsa /* SECRET-DATA */;
+}
+login {
+    class acorusread {
+        idle-timeout 15;
+        permissions [ view view-configuration ];
+        allow-commands "(ping.*)|(show.*)|(exit)";
+    }
+    user ansible-bot {
+        full-name "Ansible bot for automation";
+```
+
+
+### Step 2: IGP configuration
+
+In this lab we'll configure OSPF to perform loopbacks reachability.
+
+It is a requirement for the next lab as we'll setup IBGP sessions.
+
+We'll also run some tests to ensure we have a working topology.
+
+#### Configure loopbacks on devices :
+
+Current setup :
+
+```
+vagrant@vqfx1> show ospf overview
+OSPF instance is not running
+```
+
+
+### Step 3: Configure BGP sessions
+
+Explain lab ...
+
+
+#### Establish IBGP sessions
 
 Current setup :
 
@@ -415,7 +500,7 @@ inet.0: 9 destinations, 9 routes (9 active, 0 holddown, 0 hidden)
                     > to 10.1.2.2 via xe-0/0/0.0
 ```
 
-### Step 3: Edit imports on BGP sessions
+### Step 4: Edit imports on BGP sessions
 
 Ajouter des variables dans l'iventaire pour autoriser seulement 1 prefixe
 
