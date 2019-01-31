@@ -4,9 +4,9 @@
 {% if igp.loopbacks is defined %}
 {% for loopback in igp.loopbacks %}
 interfaces {
+  replace:{{ "\n" }}
   {{ loopback.name }} {
 
-    {%+ if load_method is defined and load_method == "replace" %}replace:{{ "\n" }}{% endif %}
     unit {{ loopback.vlan }} {
 
 {% if loopback.ipv4 is defined %}
@@ -31,12 +31,14 @@ interfaces {
 
 interfaces {
 
-  {%+ if load_method is defined and load_method == "replace" %}replace:{{ "\n" }}{% endif %}
+  replace:{{ "\n" }}
   {{ neighbor.interface }} {
+
+    {% set peer = neighbor.peer %}
 
     {% if neighbor.vlans is defined %}
     {% for vlan in neighbor.vlans %}
-      
+
     {% if vlan.id != 0 and loop.index == 1 %}
     vlan-tagging;
     {% endif %}
@@ -45,7 +47,7 @@ interfaces {
 
       {%+ if vlan.id != 0 %}vlan-id {{ vlan.id }};{% endif %}
 
-      description "Core:" + interface.peer
+      description "Core: {{ peer }}"
 
       {% if vlan.ipv4 is defined %}
       family inet {
@@ -71,3 +73,4 @@ interfaces {
 
 {# Endif igp is defined #}
 {% endif %}
+

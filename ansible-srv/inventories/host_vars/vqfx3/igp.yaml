@@ -4,7 +4,7 @@ igp:
       local_ip: 10.200.0.3
       netmask: 32
     name: lo0
-    vlan: 100
+    vlan: 0
   neighbors:
   - interface: xe-0/0/1
     peer: vqfx1
