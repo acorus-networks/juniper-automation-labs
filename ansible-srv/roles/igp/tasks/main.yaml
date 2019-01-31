@@ -5,6 +5,7 @@
   file: path=~/configs/{{ ansible_host }} state=directory
 
 - file: path=~/configs/{{ ansible_host }}/igp.conf.part state=absent
+- file: path=~/configs/{{ ansible_host }}/ospf.conf.part state=absent
 - file: path=~/configs/{{ ansible_host }}/{{ ansible_host }}.conf state=absent
 
 - name: IGP Configuration
@@ -15,3 +16,12 @@
     - igp
   with_items:
     - igp.conf
+
+- name: OSPF Configuration
+  template:
+    src={{ item }}.j2
+    dest=~/configs/{{ ansible_host }}/{{ item }}.part
+  tags:
+    - ospf
+  with_items:
+    - ospf.conf

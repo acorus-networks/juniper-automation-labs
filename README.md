@@ -401,13 +401,13 @@ login {
 
 ### Step 2: IGP configuration
 
-In this lab we'll configure OSPF to perform loopbacks reachability.
+In this lab we'll configure interco's and OSPF to perform loopbacks reachability.
 
 It is a requirement for the next lab as we'll setup IBGP sessions.
 
 We'll also run some tests to ensure we have a working topology.
 
-#### Configure loopbacks on devices :
+#### Templates review & configuration :
 
 Current setup :
 
@@ -415,6 +415,76 @@ Current setup :
 vagrant@vqfx1> show ospf overview
 OSPF instance is not running
 ```
+
+Check content of inventories/host_vars/vqfx1/igp.yaml
+Check content of roles/igp/templates/*.yaml
+
+The below playbook will configure interfaces, loopbacks & OSPF.
+```
+ansible-playbook -i inventories/hosts pb.juniper.igp.yaml --vault-id ~/.vault_pass.txt
+```
+
+New setup :
+
+```
+vagrant@vqfx1> show ospf overview
+vagrant@vqfx1> show ospf overview
+Instance: master
+  Router ID: 10.200.0.1
+  Route table index: 0
+  LSA refresh time: 50 minutes
+  Area: 0.0.0.0
+    Stub type: Not Stub
+    Authentication Type: None
+    Area border routers: 0, AS boundary routers: 0
+    Neighbors
+      Up (in full state): 2
+  Topology: default (ID 0)
+    Prefix export count: 0
+    Full SPF runs: 7
+    SPF delay: 0.200000 sec, SPF holddown: 5 sec, SPF rapid runs: 3
+    Backup SPF: Not Needed
+
+{master:0}
+```
+
+#### Check loopbacks reachability :
+
+You should have loopbacks of all VQFX in the routing table now :
+
+```
+vagrant@vqfx1> show route 10.200.0.0/24
+```
+
+OUTPUT
+
+```
+inet.0: 16 destinations, 17 routes (16 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+10.200.0.1/32      *[Direct/0] 01:09:39
+                    > via lo0.0
+10.200.0.2/32      *[OSPF/10] 00:13:52, metric 2500
+                    > to 192.168.2.2 via xe-0/0/0.0
+10.200.0.3/32      *[OSPF/10] 00:13:44, metric 2500
+                    > to 192.168.3.2 via xe-0/0/1.0
+```
+
+Now we'll run a playbook to ping all others loopbacks :
+
+```
+   - name: check if junos devices can ping some ip @ supposed to be learnt with BGP
+     junos_ping:
+        host: "{{ junos_host }}"
+        user: "{{ ADMUSER }}"
+        passwd: "{{ ADMPASS }}"
+        dest_ip: "{{ item.peer_loopback }}"
+        source_ip: "{{ item.local_ip }}"
+        ttl: 1
+     with_items:
+- "{{ neighbors }}"
+```
+
 
 
 ### Step 3: Configure BGP sessions

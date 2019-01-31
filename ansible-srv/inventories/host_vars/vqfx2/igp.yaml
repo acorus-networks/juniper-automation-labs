@@ -11,7 +11,7 @@ igp:
     speed: 10G
     type: local-core
     vlans:
-    - id: 100
+    - id: 0
       ipv4:
         local_ip: 192.168.2.2
         netmask: 24
@@ -21,7 +21,7 @@ igp:
     speed: 10G
     type: local-core
     vlans:
-    - id: 100
+    - id: 0
       ipv4:
         local_ip: 192.168.4.1
         netmask: 24
