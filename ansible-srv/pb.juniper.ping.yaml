@@ -1,0 +1,28 @@
+---
+- name: Ping devices
+  hosts: all
+  connection: network_cli
+  gather_facts: no
+
+  roles:
+    - Juniper.junos
+
+  vars:
+    ansible_network_os: junos
+    ansible_user: noc
+
+  tasks:
+
+    - name: check if junos devices
+      junos_ping:
+         dest_ip: "{{ item.vlans[0].ipv4.peer_ip }}"
+         source_ip: "{{ item.vlans[0].ipv4.local_ip }}"
+         count: 10
+         ttl: 1
+      register: response
+      with_items:
+         - "{{ igp.neighbors }}"
+
+    - name: Print the average round-trip-time from the response.
+      debug:
+        var: response.rtt_average

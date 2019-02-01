@@ -420,6 +420,7 @@ Check content of inventories/host_vars/vqfx1/igp.yaml
 Check content of roles/igp/templates/*.yaml
 
 The below playbook will configure interfaces, loopbacks & OSPF.
+
 ```
 ansible-playbook -i inventories/hosts pb.juniper.igp.yaml --vault-id ~/.vault_pass.txt
 ```
@@ -427,7 +428,6 @@ ansible-playbook -i inventories/hosts pb.juniper.igp.yaml --vault-id ~/.vault_pa
 New setup :
 
 ```
-vagrant@vqfx1> show ospf overview
 vagrant@vqfx1> show ospf overview
 Instance: master
   Router ID: 10.200.0.1
@@ -448,9 +448,50 @@ Instance: master
 {master:0}
 ```
 
-#### Check loopbacks reachability :
+#### Let's run some tests :
 
-You should have loopbacks of all VQFX in the routing table now :
+Now we'll run a playbook to ping all our directly connected neighbors and their loopbacks, igp.yaml file will used to get ips of peers.
+
+```
+ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_pass.txt
+
+```
+OUTPUT
+
+CHANGE OUTPUT BELOW
+
+```
+vagrant@server:~$ ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_pass.txt
+
+PLAY [Ping devices] *******************************************************************************************************************************************************************************************************************************************************************************************
+
+TASK [check if junos devices] *********************************************************************************************************************************************************************************************************************************************************************************
+ok: [vqfx3] => (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.2', u'peer_ip': u'192.168.3.1'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx1] => (item={u'interface': u'xe-0/0/0', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.2.1', u'peer_ip': u'192.168.2.2'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx2] => (item={u'interface': u'xe-0/0/0', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.2.2', u'peer_ip': u'192.168.2.1'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx3] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.2', u'peer_ip': u'192.168.4.1'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx1] => (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx3', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.1', u'peer_ip': u'192.168.3.2'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx2] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx3', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.1', u'peer_ip': u'192.168.4.2'}}], u'speed': u'10G', u'type': u'local-core'})
+
+TASK [Print the average round-trip-time from the response.] ***************************************************************************************************************************************************************************************************************************************************
+ok: [vqfx1] => {
+    "response.rtt_average": "VARIABLE IS NOT DEFINED!"
+}
+ok: [vqfx2] => {
+    "response.rtt_average": "VARIABLE IS NOT DEFINED!"
+}
+ok: [vqfx3] => {
+    "response.rtt_average": "VARIABLE IS NOT DEFINED!"
+}
+
+PLAY RECAP ****************************************************************************************************************************************************************************************************************************************************************************************************
+vqfx1                      : ok=2    changed=0    unreachable=0    failed=0
+vqfx2                      : ok=2    changed=0    unreachable=0    failed=0
+vqfx3                      : ok=2    changed=0    unreachable=0    failed=0
+```
+
+
+You should have loopbacks of all VQFX in the routing table now (run the command on vqfx1):
 
 ```
 vagrant@vqfx1> show route 10.200.0.0/24
@@ -470,26 +511,34 @@ inet.0: 16 destinations, 17 routes (16 active, 0 holddown, 0 hidden)
                     > to 192.168.3.2 via xe-0/0/1.0
 ```
 
-Now we'll run a playbook to ping all others loopbacks :
+Let's try to shut the link between VQFX1 and VQFX3 :
 
 ```
-   - name: check if junos devices can ping some ip @ supposed to be learnt with BGP
-     junos_ping:
-        host: "{{ junos_host }}"
-        user: "{{ ADMUSER }}"
-        passwd: "{{ ADMPASS }}"
-        dest_ip: "{{ item.peer_loopback }}"
-        source_ip: "{{ item.local_ip }}"
-        ttl: 1
-     with_items:
-- "{{ neighbors }}"
+vagrant@vqfx1> edit
+vagrant@vqfx1# set interfaces xe-0/0/1 disable
+vagrant@vqfx1# commit
 ```
 
+Re-run the test playbook and check that all loopbacks are still reacheable from all devices :
+
+```
+ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_pass.txt
+
+```
+OUTPUT
+
+CHANGE OUTPUT BELOW
+
+```
+BLABLA
+```
 
 
 ### Step 3: Configure BGP sessions
 
-Explain lab ...
+In this lab we'll configure iBGP sessions, full mesh.
+
+In this step sessions but also policies will be added to the config.
 
 
 #### Establish IBGP sessions
@@ -542,7 +591,7 @@ PLAY RECAP *********************************************************************
 vqfx1                       : ok=7    changed=4    unreachable=0    failed=0
 ```
 
-#### Verification
+#### Checks
 
 Session BGP UP
 
@@ -572,13 +621,13 @@ inet.0: 9 destinations, 9 routes (9 active, 0 holddown, 0 hidden)
 
 ### Step 4: Edit imports on BGP sessions
 
-Ajouter des variables dans l'iventaire pour autoriser seulement 1 prefixe
+Add variables in inventory to allow only one prefix to be exported :
 
 ```
-vagrant@server:~/ansible$ nano inventories/group_vars/all/bgp_transit_filter.yaml
+vagrant@server$ nano inventories/group_vars/all/bgp_transit_filter.yaml
 ```
 
-Le format est le suivant, on autorise seulement le prefix 2.0.0.0/24 a etre annonce par l'AS 123
+Add the below lines to the file, we allow 2.0.0.0/24 to be exported to AS123
 
 ```
 ---
@@ -588,17 +637,17 @@ transit_filtered_prefixes:
     - 2.0.0.0/24
 ```
 
-On pousse la modification via ansible
+Let's apply the config now :
 
 ```
-vagrant@server:~/ansible$ ansible-playbook -i inventories/hosts pb.juniper.bgp.yaml --vault-id ~/.vault_pass.txt
+vagrant@server$ ansible-playbook -i inventories/hosts pb.juniper.bgp.yaml --vault-id ~/.vault_pass.txt
 ```
 
 OUTPUT
 
 ```
 TASK [Print the difference if exists] ***********************************************************************************************
-ok: [vqfx] => {
+ok: [vqfx1] => {
     "response.diff_lines": [
         "",
         "[edit policy-options policy-statement ipv4-as123]",
@@ -617,12 +666,12 @@ ok: [vqfx] => {
 }
 ```
 
-#### Verification
+#### Checks
 
-On peut verifier qu'il n'y a plus qu'une route acceptée
+Only the route we allowed is present in the routing table.
 
 ```
-vagrant@vqfx-re> show route receive-protocol bgp 10.1.2.2
+agrant@vqfx1> show route receive-protocol bgp 10.1.2.2
 ```
 
 OUTPUT
@@ -633,10 +682,10 @@ inet.0: 9 destinations, 9 routes (8 active, 0 holddown, 1 hidden)
 * 2.0.0.0/24              10.1.2.2                                123 I
 ```
 
-On peut aussi voir la route refusée
+We can also check the routes that are denied by the policies :
 
 ```
-vagrant@vqfx-re> show route receive-protocol bgp 10.1.2.2 hidden
+agrant@vqfx1> show route receive-protocol bgp 10.1.2.2 hidden
 ```
 
 OUTPUT
