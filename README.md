@@ -77,7 +77,6 @@ All VQFX and server will be preconfigured.
 
 - Ansible 
 - Vagrant / Virtualbox
-- Bird (installed on the server)
 - Ansible Vault
 
 ## Installation
@@ -203,7 +202,7 @@ Everything is tested and ready, let's start the lab now !
 
 # Labs
 
-### Step 1 : Add a new user on all network devices
+## Step 1 : Add a new user on all network devices
 
 In this lab we'll show how to create and deploy new users on a group of network devices.
 
@@ -399,7 +398,7 @@ login {
 ```
 
 
-### Step 2: IGP configuration
+## Step 2: IGP configuration
 
 In this lab we'll configure interco's and OSPF to perform loopbacks reachability.
 
@@ -458,33 +457,31 @@ ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_p
 ```
 OUTPUT
 
-CHANGE OUTPUT BELOW
-
 ```
 vagrant@server:~$ ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_pass.txt
 
-PLAY [Ping devices] *******************************************************************************************************************************************************************************************************************************************************************************************
+PLAY [Ping devices] *********************************************************************************************************************
 
-TASK [check if junos devices] *********************************************************************************************************************************************************************************************************************************************************************************
-ok: [vqfx3] => (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.2', u'peer_ip': u'192.168.3.1'}}], u'speed': u'10G', u'type': u'local-core'})
+TASK [check if neighbors are reacheable on intercos] ************************************************************************************
 ok: [vqfx1] => (item={u'interface': u'xe-0/0/0', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.2.1', u'peer_ip': u'192.168.2.2'}}], u'speed': u'10G', u'type': u'local-core'})
 ok: [vqfx2] => (item={u'interface': u'xe-0/0/0', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.2.2', u'peer_ip': u'192.168.2.1'}}], u'speed': u'10G', u'type': u'local-core'})
-ok: [vqfx3] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.2', u'peer_ip': u'192.168.4.1'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx3] => (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.2', u'peer_ip': u'192.168.3.1'}}], u'speed': u'10G', u'type': u'local-core'})
 ok: [vqfx1] => (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx3', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.1', u'peer_ip': u'192.168.3.2'}}], u'speed': u'10G', u'type': u'local-core'})
 ok: [vqfx2] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx3', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.1', u'peer_ip': u'192.168.4.2'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx3] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.2', u'peer_ip': u'192.168.4.1'}}], u'speed': u'10G', u'type': u'local-core'})
 
-TASK [Print the average round-trip-time from the response.] ***************************************************************************************************************************************************************************************************************************************************
-ok: [vqfx1] => {
-    "response.rtt_average": "VARIABLE IS NOT DEFINED!"
-}
-ok: [vqfx2] => {
-    "response.rtt_average": "VARIABLE IS NOT DEFINED!"
-}
-ok: [vqfx3] => {
-    "response.rtt_average": "VARIABLE IS NOT DEFINED!"
-}
+TASK [check if neighbors loopbacks are reacheable] **************************************************************************************
+ok: [vqfx1] => (item=10.200.0.1)
+ok: [vqfx2] => (item=10.200.0.1)
+ok: [vqfx3] => (item=10.200.0.1)
+ok: [vqfx1] => (item=10.200.0.2)
+ok: [vqfx2] => (item=10.200.0.2)
+ok: [vqfx3] => (item=10.200.0.2)
+ok: [vqfx1] => (item=10.200.0.3)
+ok: [vqfx2] => (item=10.200.0.3)
+ok: [vqfx3] => (item=10.200.0.3)
 
-PLAY RECAP ****************************************************************************************************************************************************************************************************************************************************************************************************
+PLAY RECAP ******************************************************************************************************************************
 vqfx1                      : ok=2    changed=0    unreachable=0    failed=0
 vqfx2                      : ok=2    changed=0    unreachable=0    failed=0
 vqfx3                      : ok=2    changed=0    unreachable=0    failed=0
@@ -527,18 +524,77 @@ ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_p
 ```
 OUTPUT
 
-CHANGE OUTPUT BELOW
+```
+vagrant@server:~$ ansible-playbook -i inventories/hosts pb.juniper.ping.yaml --vault-id ~/.vault_pass.txt
+
+PLAY [Ping devices] *********************************************************************************************************************
+
+TASK [check if neighbors are reacheable on intercos] ************************************************************************************
+ok: [vqfx2] => (item={u'interface': u'xe-0/0/0', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.2.2', u'peer_ip': u'192.168.2.1'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx1] => (item={u'interface': u'xe-0/0/0', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.2.1', u'peer_ip': u'192.168.2.2'}}], u'speed': u'10G', u'type': u'local-core'})
+failed: [vqfx3] (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx1', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.2', u'peer_ip': u'192.168.3.1'}}], u'speed': u'10G', u'type': u'local-core'}) => {"acceptable_percent_loss": "0", "changed": false, "count": "5", "dest": "192.168.3.1", "dest_ip": "192.168.3.1", "do_not_fragment": false, "host": "192.168.3.1", "interface": null, "item": {"interface": "xe-0/0/1", "peer": "vqfx1", "speed": "10G", "type": "local-core", "vlans": [{"id": 0, "ipv4": {"local_ip": "192.168.3.2", "netmask": 24, "peer_ip": "192.168.3.1"}}]}, "msg": "Loss 100%, (Sent 5 | Received 0)", "packet_loss": "100", "packets_received": "0", "packets_sent": "5", "rapid": true, "routing_instance": null, "rtt_average": null, "rtt_maximum": null, "rtt_minimum": null, "rtt_stddev": null, "size": null, "source": "192.168.3.2", "source_ip": "192.168.3.2", "state": "absent", "timeout": "30", "ttl": "1"}
+ok: [vqfx2] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx3', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.1', u'peer_ip': u'192.168.4.2'}}], u'speed': u'10G', u'type': u'local-core'})
+ok: [vqfx3] => (item={u'interface': u'xe-0/0/2', u'peer': u'vqfx2', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.4.2', u'peer_ip': u'192.168.4.1'}}], u'speed': u'10G', u'type': u'local-core'})
+...ignoring
+ [WARNING]: sendto: Can't assign requested address
+
+failed: [vqfx1] (item={u'interface': u'xe-0/0/1', u'peer': u'vqfx3', u'vlans': [{u'id': 0, u'ipv4': {u'netmask': 24, u'local_ip': u'192.168.3.1', u'peer_ip': u'192.168.3.2'}}], u'speed': u'10G', u'type': u'local-core'}) => {"acceptable_percent_loss": "0", "changed": false, "count": "5", "dest": "192.168.3.2", "dest_ip": "192.168.3.2", "do_not_fragment": false, "host": "192.168.3.2", "interface": null, "item": {"interface": "xe-0/0/1", "peer": "vqfx3", "speed": "10G", "type": "local-core", "vlans": [{"id": 0, "ipv4": {"local_ip": "192.168.3.1", "netmask": 24, "peer_ip": "192.168.3.2"}}]}, "msg": "Loss 100%, (Sent 5 | Received 0)", "packet_loss": "100", "packets_received": "0", "packets_sent": "5", "rapid": true, "routing_instance": null, "rtt_average": null, "rtt_maximum": null, "rtt_minimum": null, "rtt_stddev": null, "size": null, "source": "192.168.3.1", "source_ip": "192.168.3.1", "state": "absent", "timeout": "30", "ttl": "1"}
+...ignoring
+
+TASK [check if neighbors loopbacks are reacheable] **************************************************************************************
+ok: [vqfx1] => (item=10.200.0.1)
+ok: [vqfx2] => (item=10.200.0.1)
+ok: [vqfx3] => (item=10.200.0.1)
+ok: [vqfx1] => (item=10.200.0.2)
+ok: [vqfx2] => (item=10.200.0.2)
+ok: [vqfx3] => (item=10.200.0.2)
+ok: [vqfx3] => (item=10.200.0.3)
+ok: [vqfx2] => (item=10.200.0.3)
+ok: [vqfx1] => (item=10.200.0.3)
 
 ```
-BLABLA
+
+We can confirm that interco vqfx1 <--> vqfx3 is unreachable. We even have a warning on vqfx1 (sendto: Can't assign requested address), this is the interface we disabled.
+On the other hand all our loopbacks are still online. 
+
+```
+vagrant@vqfx1> show route 10.200.0.0/24
 ```
 
+OUTPUT
 
-### Step 3: Configure BGP sessions
+```
+vagrant@vqfx1> show route 10.200.0.0/24
+
+inet.0: 16 destinations, 17 routes (16 active, 0 holddown, 0 hidden)
++ = Active Route, - = Last Active, * = Both
+
+10.200.0.1/32      *[Direct/0] 3d 20:52:54
+                    > via lo0.0
+10.200.0.2/32      *[OSPF/10] 3d 20:52:34, metric 2500
+                    > to 192.168.2.2 via xe-0/0/0.0
+10.200.0.3/32      *[OSPF/10] 00:12:14, metric 5000
+                    > to 192.168.2.2 via xe-0/0/0.0
+```
+
+Note the increased metric on 10.200.0.3/32 route from vqfx routing table.
+
+Last step re-activate the disabled interface on vqfx1 :
+
+```
+vagrant@vqfx1> edit
+vagrant@vqfx1# delete interfaces xe-0/0/1 disable
+vagrant@vqfx1# commit
+```
+ 
+
+## Step 3: Configure BGP sessions
 
 In this lab we'll configure iBGP sessions, full mesh.
 
-In this step sessions but also policies will be added to the config.
+In this step bgp sessions, but also policies will be added to the config.
+
+Our AS for this lab will be 65500.
 
 
 #### Establish IBGP sessions
