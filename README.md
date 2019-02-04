@@ -596,6 +596,16 @@ In this step bgp sessions, but also policies will be added to the config.
 
 Our AS for this lab will be 65500.
 
+We also generate a dummy prefix on each vqfx (for testing purpose) :
+
+vqfx1 = 1.0.0.0/8
+
+vqfx2 = 2.0.0.0/8
+
+vqfx3 = 3.0.0.0/8
+
+Generated prefixes will be advertised (via send-static policy).
+
 
 #### Establish IBGP sessions
 
@@ -675,7 +685,7 @@ inet.0: 9 destinations, 9 routes (9 active, 0 holddown, 0 hidden)
                     > to 10.1.2.2 via xe-0/0/0.0
 ```
 
-### Step 4: Edit imports on BGP sessions
+## Step 4: Edit imports on BGP sessions
 
 Add variables in inventory to allow only one prefix to be exported :
 
@@ -752,15 +762,36 @@ inet.0: 9 destinations, 9 routes (8 active, 0 holddown, 1 hidden)
   1.0.0.0/24              10.1.2.2                                123 I
 ```
 
-### Etape 4: Delete filtering
+## Etape 4: Delete filtering
 
 Find a solution :)
 
 
-### Pro tips : 
+## Pro tips : 
 
 If you want to reset the to the orginal state, run :
 
 ```
 acorus@demo1:~/juniper-automation-labs$ vagrant provision
+```
+
+Rollback configuration to a previous state on vqfx, first select commit to rollback :
+
+```
+vagrant@vqfx1# show | compare rollback 1
+[edit groups]
+-  /* OSPF Core */
+-  ospf-core {
+-      protocols {
+-          ospf {
+```
+
+Perform rollback to the desired commit number :
+
+```
+vagrant@vqfx1# rollback 1
+load complete
+
+{master:0}[edit]
+vagrant@vqfx1# commit
 ```

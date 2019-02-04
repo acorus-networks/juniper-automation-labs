@@ -1,12 +1,12 @@
 protocols {
-  
+
   bgp {
 
     {% for peer in peers %}
     replace:
     group ipv4-{{ peer.name }} {
-      description "IPV4 AS{{ peer.asn }}"
-      type external;
+      description "IPV4 AS{{ peer.name }}"
+      type internal;
 
       family inet {
         unicast;
@@ -14,11 +14,12 @@ protocols {
 
       local-as 65500;
       local-address {{ peer.local_ipv4 }};
+      advertise-inactive;
 
       neighbor {{ peer.neighbor_ipv4  }};
-      peer-as {{ peer.asn  }};
 
-      import ipv4-as{{ peer.asn }};
+      import ipv4-{{ peer.name }};
+      export send-static;
 
     }
     {% endfor %}
@@ -27,10 +28,10 @@ protocols {
 
 
 policy-options {
-  
+
   {% for peer in peers %}
   replace:
-  policy-statement ipv4-as{{ peer.asn }} {
+  policy-statement ipv4-{{ peer.name }} {
 
     {% if (transit_filtered_prefixes is defined) and (transit_filtered_prefixes[peer.asn] is defined) and (transit_filtered_prefixes[peer.asn]['ipv4'] is defined) and ((transit_filtered_prefixes[peer.asn]['ipv4']|length ) > 0) %}
 
@@ -51,4 +52,31 @@ policy-options {
 
   }
   {% endfor %}
+
+  policy-statement send-static {
+        term 1 {
+            from protocol static;
+            then accept;
+        }
+    }
 }
+
+{% if ansible_host == 'vqfx1' %}
+{% set prefix = "1.0.0.0/8" %}
+{% elif ansible_host == 'vqfx2' -%}
+{% set prefix = "2.0.0.0/8" %}
+{% elif ansible_host == 'vqfx3' -%}
+{% set prefix = "3.0.0.0/8" %}
+{% endif %}
+
+routing-options {
+    static {
+        route {{ prefix }} {
+            discard;
+            install;
+            readvertise;
+            active;
+        }
+    }
+}
+

@@ -1,0 +1,10 @@
+---
+
+- name: Check if directory config is present
+  file: path=~/configs state=directory
+
+- name: Clean device config path
+  file:
+    state: absent
+    path: ~/configs/{{ ansible_host }}
+    
