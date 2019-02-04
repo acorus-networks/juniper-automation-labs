@@ -1,5 +1,0 @@
----
-transit_filtered_prefixes:
-  123:
-    ipv4:
-    - 2.0.0.0/24

@@ -625,47 +625,57 @@ vagrant@server$ ansible-playbook -i inventories/hosts pb.juniper.bgp.yaml --vaul
 OUTPUT
 
 ```
-TASK [Print the difference if exists] ***********************************************************************************************
+vagrant@server:~$ ansible-playbook -i inventories/hosts pb.juniper.bgp.yaml --vault-id ~/.vault_pass.txt
+
+PLAY [Config BGP of Juniper devices] ****************************************************************************************************
+
+...
+
+TASK [Pushing config ... please wait ...] ***********************************************************************************************
+changed: [vqfx2]
+changed: [vqfx3]
+changed: [vqfx1]
+
+TASK [Print the difference if exists] ***************************************************************************************************
 ok: [vqfx1] => {
     "response.diff_lines": [
         "",
-        "[edit protocols]",
-        "+   bgp {",
-        "+       group ipv4-transit-123 {",
-        "+           type external;",
-        "+           description \"IPV4 AS123\";",
-        "+           local-address 10.1.2.1;",
-        "+           import ipv4-as123;",
-        "+           family inet {",
-        "+               unicast;",
-        "+           }",
-        "+           peer-as 123;",
-        "+           local-as 65500;",
-        "+           neighbor 10.1.2.2;",
+        "[edit routing-options]",
+        "+   static {",
+        "+       route 1.0.0.0/8 {",
+        "+           discard;",
+        "+           install;",
+        "+           readvertise;",
+        "+           active;",
         "+       }",
         "+   }",
-        "[edit]",
-        "+  policy-options {",
-        "+      policy-statement ipv4-as123 {",
-        "+          then accept;"
-        "+      }",
-        "+  }"
-    ]
-}
-
-PLAY RECAP **************************************************************************************************************************
-vqfx1                       : ok=7    changed=4    unreachable=0    failed=0
+        "[edit protocols]",
+ 
 ```
 
 #### Checks
 
-Session BGP UP
+You should have two peers with established sessions :
 
 ```
 vagrant@vqfx1> show bgp summary
 ```
 
-Received routes
+OUTPUT
+
+```
+vagrant@vqfx1> show bgp summary
+Groups: 2 Peers: 2 Down peers: 0
+Table          Tot Paths  Act Paths Suppressed    History Damp State    Pending
+inet.0
+                       2          2          0          0          0          0
+Peer                     AS      InPkt     OutPkt    OutQ   Flaps Last Up/Dwn State|#Active/Received/Accepted/Damped...
+10.200.0.2            65500         10          9       0       0        3:15 1/1/1/0              0/0/0/0
+10.200.0.3            65500         10          9       0       0        3:17 1/1/1/0              0/0/0/0
+```
+
+
+Look at the received routes :
 
 ```
 vagrant@vqfx1> show route protocol bgp
@@ -674,98 +684,112 @@ vagrant@vqfx1> show route protocol bgp
 OUTPUT
 
 ```
-inet.0: 9 destinations, 9 routes (9 active, 0 holddown, 0 hidden)
+vagrant@vqfx1> show route protocol bgp
+
+inet.0: 19 destinations, 20 routes (19 active, 0 holddown, 0 hidden)
 + = Active Route, - = Last Active, * = Both
 
-1.0.0.0/24         *[BGP/170] 00:02:26, localpref 100
-                      AS path: 123 I, validation-state: unverified
-                    > to 10.1.2.2 via xe-0/0/0.0
-2.0.0.0/24         *[BGP/170] 00:02:48, localpref 100
-                      AS path: 123 I, validation-state: unverified
-                    > to 10.1.2.2 via xe-0/0/0.0
+2.0.0.0/8          *[BGP/170] 00:04:05, localpref 100, from 10.200.0.2
+                      AS path: I, validation-state: unverified
+                    > to 192.168.2.2 via xe-0/0/0.0
+3.0.0.0/8          *[BGP/170] 00:04:07, localpref 100, from 10.200.0.3
+                      AS path: I, validation-state: unverified
+                    > to 192.168.3.2 via xe-0/0/1.0
 ```
 
-## Step 4: Edit imports on BGP sessions
+## Step 4: Filter imports on BGP sessions
 
-Add variables in inventory to allow only one prefix to be exported :
+In this step we'll automate the process of denying a specific prefix in import policies of peers.
 
-```
-vagrant@server$ nano inventories/group_vars/all/bgp_transit_filter.yaml
-```
+For this lab you will have to find a solution by yourself. 
 
-Add the below lines to the file, we allow 2.0.0.0/24 to be exported to AS123
+We want prefix 2.0.0.0/8 to be denied by all import policies of all peers.
 
-```
----
-transit_filtered_prefixes:
-  123:
-    ipv4:
-    - 2.0.0.0/24
-```
 
-Let's apply the config now :
+#### Add vars with denied prefix
 
-```
-vagrant@server$ ansible-playbook -i inventories/hosts pb.juniper.bgp.yaml --vault-id ~/.vault_pass.txt
-```
+Have a look at the templates in the BGP role, it will give you clues on how to deny the prefix.
 
-OUTPUT
+Create a new variables file in inventory to discard one prefix to be imported by policies.
 
-```
-TASK [Print the difference if exists] ***********************************************************************************************
-ok: [vqfx1] => {
-    "response.diff_lines": [
-        "",
-        "[edit policy-options policy-statement ipv4-as123]",
-        "+    term accepted {",
-        "+        from {",
-        "+            route-filter 2.0.0.0/24 exact;",
-        "+        }",
-        "+        then accept;",
-        "+    }",
-        "+    term other {",
-        "+        then reject;",
-        "+    }",
-        "[edit policy-options policy-statement ipv4-as123]",
-        "-    then accept;"
-    ]
-}
-```
+#### Push the config
+
+Re-run the bgp playbook to push your changes.
 
 #### Checks
 
-Only the route we allowed is present in the routing table.
+The denied prefix (2.0.0.0/8) is absent from vqfx1 routing table :
 
 ```
-agrant@vqfx1> show route receive-protocol bgp 10.1.2.2
-```
-
-OUTPUT
-
-```
-inet.0: 9 destinations, 9 routes (8 active, 0 holddown, 1 hidden)
-  Prefix      Nexthop        MED     Lclpref    AS path
-* 2.0.0.0/24              10.1.2.2                                123 I
-```
-
-We can also check the routes that are denied by the policies :
-
-```
-agrant@vqfx1> show route receive-protocol bgp 10.1.2.2 hidden
+vagrant@vqfx1> show route protocol bgp
 ```
 
 OUTPUT
 
 ```
-inet.0: 9 destinations, 9 routes (8 active, 0 holddown, 1 hidden)
-  Prefix      Nexthop        MED     Lclpref    AS path
-  1.0.0.0/24              10.1.2.2                                123 I
+vagrant@vqfx1> show route protocol bgp
+
+inet.0: 19 destinations, 20 routes (18 active, 0 holddown, 1 hidden)
++ = Active Route, - = Last Active, * = Both
+
+          *[BGP/170] 00:33:22, localpref 100, from 10.200.0.3
+                      AS path: I, validation-state: unverified
+                    > to 192.168.3.2 via xe-0/0/1.0
+
 ```
 
-## Etape 4: Delete filtering
+We have one hidden route, let's check it :
 
-Find a solution :)
 
+```
+vagrant@vqfx1> show route protocol bgp hidden
+```
+
+OUTPUT
+
+```
+inet.0: 19 destinations, 20 routes (18 active, 0 holddown, 1 hidden)
++ = Active Route, - = Last Active, * = Both
+
+2.0.0.0/8           [BGP ] 00:12:37, localpref 100, from 10.200.0.2
+                      AS path: I, validation-state: unverified
+                    > to 192.168.2.2 via xe-0/0/0.0
+```
+
+Finally look at the bgp summary command :
+
+```
+vagrant@vqfx1> show bgp summary
+```
+
+OUTPUT
+
+```
+Groups: 2 Peers: 2 Down peers: 0
+Table          Tot Paths  Act Paths Suppressed    History Damp State    Pending
+inet.0
+                       2          1          0          0          0          0
+Peer                     AS      InPkt     OutPkt    OutQ   Flaps Last Up/Dwn State|#Active/Received/Accepted/Damped...
+10.200.0.2            65500         84         83       0       0       36:20 0/1/0/0              0/0/0/0
+10.200.0.3            65500         75         82       0       0       36:22 1/1/1/0              0/0/0/0
+```
+
+We see that zero routes are imported on peer 10.200.0.2 (below state row).
+
+#### Restore routing
+
+Now find a way to remove the filtering on your peers.
+
+
+## Step 5: Adapt local preference
+
+For this lab you have to change the local preference for 3.0.0.0/8 towards 10.200.0.3 on import policy of vqfx1 to the value of 500.
+
+Of course without breaking the previous filtering system you deployed in step 4.
+
+Feel free to find any solution :)
+
+Check the pro tips below in case you break something on the lab.
 
 ## Pro tips : 
 

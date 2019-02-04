@@ -1,3 +1,4 @@
+vagrant@server:~$ cat roles/bgp/templates/bgp.conf.j2
 protocols {
 
   bgp {
@@ -33,19 +34,17 @@ policy-options {
   replace:
   policy-statement ipv4-{{ peer.name }} {
 
-    {% if (transit_filtered_prefixes is defined) and (transit_filtered_prefixes[peer.asn] is defined) and (transit_filtered_prefixes[peer.asn]['ipv4'] is defined) and ((transit_filtered_prefixes[peer.asn]['ipv4']|length ) > 0) %}
+    {% if (filtered_prefixes is defined) and (filtered_prefixes[peer.asn] is defined) and (filtered_prefixes[peer.asn]['ipv4'] is defined) and ((filtered_prefixes[peer.asn]['ipv4']|length ) > 0) %}
 
-    term accepted {
+    term rejected-prefixes {
       from {
-        {% for prefix in transit_filtered_prefixes[peer.asn]['ipv4'] %}
+        {% for prefix in filtered_prefixes[peer.asn]['ipv4'] %}
           route-filter {{ prefix }} exact;
         {% endfor %}
       }
-      then accept;
-    }
-    term other {
       then reject;
     }
+    then accept;
     {% else %}
     then accept;
     {% endif %}
@@ -79,4 +78,5 @@ routing-options {
         }
     }
 }
+
 
