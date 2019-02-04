@@ -6,6 +6,7 @@
  
   roles:
     - Juniper.junos
+    - tools
     - igp
 
   vars:

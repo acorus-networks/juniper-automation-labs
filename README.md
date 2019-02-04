@@ -79,7 +79,7 @@ All VQFX and server will be preconfigured.
 - Vagrant / Virtualbox
 - Ansible Vault
 
-## Installation
+## Lab setup
 
 #### SSH on the demo machine :
 
@@ -752,6 +752,15 @@ inet.0: 9 destinations, 9 routes (8 active, 0 holddown, 1 hidden)
   1.0.0.0/24              10.1.2.2                                123 I
 ```
 
-### Etape 4: Supprimer un filtre
+### Etape 4: Delete filtering
 
 Find a solution :)
+
+
+### Pro tips : 
+
+If you want to reset the to the orginal state, run :
+
+```
+acorus@demo1:~/juniper-automation-labs$ vagrant provision
+```
