@@ -84,7 +84,7 @@ All VQFX and server will be preconfigured.
 #### SSH on the demo machine :
 
 ```
-$ ssh acorus@your_pod_ip
+$ ssh acorus@{{your_pod_ip}}
 ```
 
 #### Check vagrant env (shoud be ready to use) :
@@ -96,7 +96,7 @@ acorus@demo01:~/juniper-automation-labs$ vagrant status
 
 #### SSH to devices on lab :
 
-Open 3 more terminal, connnect to your POD demo server in each. You should have 4 terminal opened and connected to your demo server now.
+Open 3 more terminals, connnect to your POD demo server in each. You should have 4 terminal opened and connected to your demo server now.
 Then SSH to each device in the lab, repeat for vqfx1, vqfx2, vqfx3, srv.
 
 ```
@@ -127,14 +127,14 @@ system {
 
 #### Test on SRV :
 
-Run below command on srv :
+Run below command on the srv :
 
 ```
 vagrant@server:~$ ifconfig
 vagrant@server:~$ ping 192.168.100.20
 vagrant@server:~$ ssh vqfx1
 ```
-You should know be able to SSH lab VQFX from srv (192.168.100.10) under noc user :
+You should be able to SSH lab VQFX from srv (192.168.100.10) under noc user :
 
 OUTPUT
  
@@ -219,7 +219,7 @@ We'll use JunoOS for that, connect to VQFX1 :
 
 ```
 vagrant@vqfx1> edit
-vagrant@vqfx1# set system login user {YOUR_USER} class read-only authentication plain-text-password
+vagrant@vqfx1# set system login user {{YOUR_USER}} class read-only authentication plain-text-password
 New password:
 Retype new password:
 ```
@@ -265,15 +265,15 @@ vagrant@server$ ansible-vault edit inventories/group_vars/all/users.yaml
 Vault password:
 ```
 
-Password is  : ```gN4PFTz5nmWWqpiYzmrcdSwHif6ePkYy7zwyhfkeFAQW9HwAVM3edKjDAmM5nKa```
+The VAULT password is  : ```gN4PFTz5nmWWqpiYzmrcdSwHif6ePkYy7zwyhfkeFAQW9HwAVM3edKjDAmM5nKa```
 
 Append to the file :
 
 ```
-  - name: YOUR_USER
-    fullname: "Insert description here"
+  - name: {{YOUR_USER}}
+    fullname: "{{Insert description here}}"
     class: "acorusread"
-    password: "HASH_TO_COPY"
+    password: "{{HASH_TO_COPY}}"
 ```
 
 
@@ -326,8 +326,7 @@ ok: [vqfx1] => {
         "+    user ansible-bot {",
         "+        full-name \"Ansible bot for automation\";",
         "+        uid 2002;",
-        "+        class super-user;",                  : ok=7    changed=3    unreachable=0    failed=0
-
+        "+        class super-user;", 
 ```
 
 #### Verification 
@@ -335,7 +334,7 @@ ok: [vqfx1] => {
 On VQFX1 :
 
 ```
-vagrant@vqfx1> show configuration system login user {YOUR_USER}
+vagrant@vqfx1> show configuration system login user {{YOUR_USER}}
 ```
 
 OUTPUT
@@ -352,7 +351,7 @@ authentication {
 Try to ssh from server with the new user (use IP address of one of the VQFX as we already have entries in .ssh/config file) :
 
 ```
-vagrant@server:~$ ssh {YOUR_USER}@192.168.100.20
+vagrant@server:~$ ssh {{YOUR_USER}}@192.168.100.20
 Password:
 ```
 
@@ -366,6 +365,7 @@ Login should succeed and your new user now have a limited access on the device, 
 OUTPUT
 
 ```
+{YOUR_USER}@vqfx1> edit
             ^
 unknown command.
 
@@ -415,10 +415,10 @@ vagrant@vqfx1> show ospf overview
 OSPF instance is not running
 ```
 
-Check content of inventories/host_vars/vqfx1/igp.yaml
-Check content of roles/igp/templates/*.yaml
+Check content of ```~/inventories/host_vars/vqfx1/igp.yaml```
+Check content of ```~/roles/igp/templates/*.yaml```
 
-The below playbook will configure interfaces, loopbacks & OSPF.
+The playbook below will configure interfaces, loopbacks & OSPF.
 
 ```
 ansible-playbook -i inventories/hosts pb.juniper.igp.yaml --vault-id ~/.vault_pass.txt
@@ -732,7 +732,7 @@ vagrant@vqfx1> show route protocol bgp
 inet.0: 19 destinations, 20 routes (18 active, 0 holddown, 1 hidden)
 + = Active Route, - = Last Active, * = Both
 
-          *[BGP/170] 00:33:22, localpref 100, from 10.200.0.3
+3.0.0.0/8          *[BGP/170] 00:33:22, localpref 100, from 10.200.0.3
                       AS path: I, validation-state: unverified
                     > to 192.168.3.2 via xe-0/0/1.0
 
