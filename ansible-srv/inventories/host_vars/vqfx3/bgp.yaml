@@ -4,9 +4,7 @@ peers:
    local_ipv4: "10.200.0.3"
    neighbor_ipv4: "10.200.0.1"
    name: ibgp-vqfx1
-   #filter: ipv4-as123-transit-in
  - asn: 65500
    local_ipv4: "10.200.0.3"
    neighbor_ipv4: "10.200.0.2"
    name: ibgp-vqfx2
-   #filter: ipv4-as123-transit-in
