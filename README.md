@@ -697,6 +697,31 @@ inet.0: 19 destinations, 20 routes (19 active, 0 holddown, 0 hidden)
                     > to 192.168.3.2 via xe-0/0/1.0
 ```
 
+#### Test BGP state with a playbook :
+
+Create a playbook to check if sessions on all vqfx are established.
+
+You can re-use the syntax of pb.juniper.ping.yaml.
+
+Your playbook should give the below output :
+
+OUTPUT
+
+```
+vagrant@server:~$ ansible-playbook -i inventories/hosts pb.juniper.check-bgp.yaml --vault-id ~/.vault_pass.txt
+
+PLAY [Check BGP] ****************************************************************************************************************************************************
+
+TASK [check bgp peers states] ***************************************************************************************************************************************
+ok: [vqfx3] => (item={u'neighbor_ipv4': u'10.200.0.1', u'local_ipv4': u'10.200.0.3', u'asn': 65500, u'name': u'ibgp-vqfx1'})
+ok: [vqfx1] => (item={u'neighbor_ipv4': u'10.200.0.2', u'local_ipv4': u'10.200.0.1', u'asn': 65500, u'name': u'ibgp-vqfx2'})
+ok: [vqfx2] => (item={u'neighbor_ipv4': u'10.200.0.1', u'local_ipv4': u'10.200.0.2', u'asn': 65500, u'name': u'ibgp-vqfx1'})
+ok: [vqfx2] => (item={u'neighbor_ipv4': u'10.200.0.3', u'local_ipv4': u'10.200.0.2', u'asn': 65500, u'name': u'ibgp-vqfx3'})
+ok: [vqfx3] => (item={u'neighbor_ipv4': u'10.200.0.2', u'local_ipv4': u'10.200.0.3', u'asn': 65500, u'name': u'ibgp-vqfx2'})
+ok: [vqfx1] => (item={u'neighbor_ipv4': u'10.200.0.3', u'local_ipv4': u'10.200.0.1', u'asn': 65500, u'name': u'ibgp-vqfx3'})
+```
+
+
 ## Step 4: Filter imports on BGP sessions
 
 In this step we'll automate the process of denying a specific prefix in import policies of peers.
