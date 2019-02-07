@@ -1,0 +1,31 @@
+---
+- name: Ping devices
+  hosts: vqfx1
+  connection: local
+  gather_facts: no
+
+  roles:
+    - Juniper.junos
+
+  vars:
+    ansible_network_os: junos
+    credentials:
+      username: noc
+      ssh_keyfile: ~/.ssh/id_rsa
+      host: "{{ ansible_host }}"
+
+  tasks:
+
+    - name: check bgp peers states
+      junos_command:
+       provider: "{{  credentials }}"
+       commands:
+        - show bgp neighbor "{{ item }}"
+       display: 'xml'
+       waitfor:
+       - "result[0]['rpc-reply']['bgp-information']['bgp-peer']['peer-state'] == Established"
+       retries: 15
+       interval: 2
+      with_items:
+         - 10.200.0.2
+         - 10.200.0.3
