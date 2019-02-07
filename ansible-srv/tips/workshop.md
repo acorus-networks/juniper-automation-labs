@@ -1,3 +1,6 @@
+Create : `~/pb.juniper.bgp-check.yaml`
+
+```
 ---
 - name: Check BGP
   hosts: all
@@ -28,3 +31,15 @@
        interval: 2
       with_items:
          - "{{ peers }}"
+```
+
+Add the below lines to the file : `all/bgp_filter.yaml`
+
+```
+---
+filtered_prefixes:
+  65500:
+    ipv4:
+    - 2.0.0.0/8
+```
+
